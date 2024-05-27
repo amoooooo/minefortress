@@ -15,6 +15,8 @@ import net.minecraft.entity.mob.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
@@ -141,6 +143,12 @@ public abstract class BasePawnEntity extends HungryEntity implements IFortressAw
 
     public int getAttackCooldown() {
         return 15;
+    }
+
+    @Nullable
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.ENTITY_ENDERMAN_AMBIENT;
     }
 
     public static DefaultAttributeContainer.Builder createAttributes() {

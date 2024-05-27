@@ -8,11 +8,16 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.entity.BipedEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.MobEntityRenderer;
+import net.minecraft.client.render.entity.feature.EndermanEyesFeatureRenderer;
+import net.minecraft.client.render.entity.model.EndermanEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.item.AirBlockItem;
+import net.minecraft.item.BlockItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.Box;
@@ -31,19 +36,21 @@ import org.minefortress.entity.renderer.models.PawnModel;
 
 import java.util.Optional;
 
-public class PawnRenderer extends BipedEntityRenderer<BasePawnEntity, PawnModel> {
+public class PawnRenderer extends MobEntityRenderer<BasePawnEntity, PawnModel> {
 
     private static final Vector3f GREEN_COLOR = new Vector3f(0f, 1f, 0f);
     private static final Vector3f YELLOW_COLOR = new Vector3f(1f, 1f, 0f);
 
-    private static final Identifier GUY = new Identifier("minefortress", "textures/skins/guy.png");
-    private static final Identifier GUY2 = new Identifier("minefortress", "textures/skins/guy2.png");
-    private static final Identifier GUY3 = new Identifier("minefortress", "textures/skins/guy3.png");
-    private static final Identifier GUY4 = new Identifier("minefortress", "textures/skins/guy4.png");
+    private static final Identifier GUY = new Identifier("minecraft", "textures/entity/enderman/enderman.png");
+    private static final Identifier GUY2 = new Identifier("minecraft", "textures/entity/enderman/enderman.png");
+    private static final Identifier GUY3 = new Identifier("minecraft", "textures/entity/enderman/enderman.png");
+    private static final Identifier GUY4 = new Identifier("minecraft", "textures/entity/enderman/enderman.png");
 
     public PawnRenderer(EntityRendererFactory.Context context) {
         super(context, new PawnModel(context), 0.5f);
-        this.addFeature(new PawnClothesFeature(this));
+        this.addFeature(new EndermanPawnBlockFeatureRenderer(this, context.getBlockRenderManager()));
+        this.addFeature(new ConditionalHeldItemFeatureRenderer<>(this, context.getHeldItemRenderer()));
+        this.addFeature(new EndermanPawnEyesFeatureRenderer(this));
     }
 
     @Override
@@ -59,7 +66,7 @@ public class PawnRenderer extends BipedEntityRenderer<BasePawnEntity, PawnModel>
 
     @Override
     protected boolean hasLabel(BasePawnEntity colonist) {
-        return colonist.hasCustomName();
+        return false;
     }
 
     @NotNull
@@ -76,6 +83,25 @@ public class PawnRenderer extends BipedEntityRenderer<BasePawnEntity, PawnModel>
     @Override
     public void render(BasePawnEntity pawn, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         setClothesVilibility(pawn);
+        if(!pawn.getMainHandStack().isEmpty()){
+            if(pawn.getMainHandStack().getItem() instanceof BlockItem bi) {
+                if(!(bi.asItem() instanceof AirBlockItem)) {
+                    model.carryingBlock = true;
+                } else {
+                    model.carryingBlock = false;
+                }
+            } else {
+                model.carryingBlock = false;
+
+            }
+        } else {
+            model.carryingBlock = false;
+        }
+        if(pawn.isSleeping()) {
+            Vector3f sleepingDir = pawn.getSleepingDirection().getUnitVector().mul(-1f);
+            matrixStack.translate(sleepingDir.x(), sleepingDir.y(), sleepingDir.z());
+//            matrixStack.translate(0.0, 0.0, -1.0);
+        }
         super.render(pawn, f, g, matrixStack, vertexConsumerProvider, i);
 
         final MinecraftClient client = getClient();
@@ -140,13 +166,13 @@ public class PawnRenderer extends BipedEntityRenderer<BasePawnEntity, PawnModel>
     }
 
     private void setClothesVilibility(MobEntity colonist) {
-        final var colonistModel = (PlayerEntityModel<BasePawnEntity>)this.getModel();
+        final var colonistModel = (EndermanEntityModel<BasePawnEntity>)this.getModel();
         colonistModel.hat.visible = true;
-        colonistModel.jacket.visible = !colonist.isSleeping();
-        colonistModel.leftPants.visible = !colonist.isSleeping();
-        colonistModel.rightPants.visible = !colonist.isSleeping();
-        colonistModel.leftSleeve.visible = !colonist.isSleeping();
-        colonistModel.rightSleeve.visible = !colonist.isSleeping();
+//        colonistModel.jacket.visible = !colonist.isSleeping();
+//        colonistModel.leftPants.visible = !colonist.isSleeping();
+//        colonistModel.rightPants.visible = !colonist.isSleeping();
+//        colonistModel.leftSleeve.visible = !colonist.isSleeping();
+//        colonistModel.rightSleeve.visible = !colonist.isSleeping();
     }
 
     private static void renderRhombus(MatrixStack matrices, VertexConsumer vertices, Entity entity, Vector3f color) {
@@ -155,7 +181,7 @@ public class PawnRenderer extends BipedEntityRenderer<BasePawnEntity, PawnModel>
             matrices.push();
             final double xCenter = (box.minX + box.maxX) / 2;
             final double zCenter = (box.minZ + box.maxZ) / 2;
-            matrices.translate(xCenter, box.maxY * 1.5, zCenter);
+            matrices.translate(xCenter, box.maxY * 1.75, zCenter);
 
             float radians = (float) Math.toRadians(45);
 

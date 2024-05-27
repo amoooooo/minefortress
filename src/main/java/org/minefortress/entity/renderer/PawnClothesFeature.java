@@ -75,7 +75,6 @@ public class PawnClothesFeature extends FeatureRenderer<BasePawnEntity, PawnMode
             PawnClothesFeature.renderModel(this.getContextModel(), SOLDIER_BLUE, matrices, vertexConsumers, light, entity, 1.0f, 1.0f, 1.0f);
         }
         PawnClothesFeature.renderModel(this.getContextModel(), this.getClothesTexture(clothingId), matrices, vertexConsumers, light, entity, 1.0f, 1.0f, 1.0f);
-
     }
 
     protected static <T extends LivingEntity> void renderModel(EntityModel<T> model, Identifier texture, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, T entity, float red, float green, float blue) {

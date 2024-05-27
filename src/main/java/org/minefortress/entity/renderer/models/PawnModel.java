@@ -1,15 +1,16 @@
 package org.minefortress.entity.renderer.models;
 
 import net.minecraft.client.render.entity.EntityRendererFactory;
+import net.minecraft.client.render.entity.model.EndermanEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.item.Items;
 import org.minefortress.entity.BasePawnEntity;
 
-public class PawnModel extends PlayerEntityModel<BasePawnEntity> {
+public class PawnModel extends EndermanEntityModel<BasePawnEntity> {
 
     public PawnModel(EntityRendererFactory.Context context) {
-        super(context.getPart(EntityModelLayers.PLAYER), false);
+        super(context.getPart(EntityModelLayers.ENDERMAN));
     }
 
     @Override
